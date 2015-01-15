@@ -200,7 +200,7 @@ class Enterprise < ActiveRecord::Base
   end
 
   def to_param
-    "#{id}-#{name.parameterize}"
+    permalink
   end
 
   def relatives
