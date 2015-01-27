@@ -1,4 +1,4 @@
 class Customer < ActiveRecord::Base
-  belongs_to :enterprises
-  attr_accessible :customer_code, :email
+  belongs_to :enterprise
+  attr_accessible # none yet
 end
