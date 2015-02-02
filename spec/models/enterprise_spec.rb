@@ -88,7 +88,6 @@ describe Enterprise do
     it { should have_many(:supplied_products) }
     it { should have_many(:distributed_orders) }
     it { should belong_to(:address) }
-    it { should have_many(:product_distributions) }
 
     it "destroys enterprise roles upon its own demise" do
       e = create(:enterprise)
@@ -711,28 +710,6 @@ describe Enterprise do
       p = create(:product)
       oc = create(:simple_order_cycle, distributors: [d], variants: [p.master])
       d.distributed_variants.should == [p.master]
-    end
-  end
-
-  describe "finding variants distributed by the enterprise in a product distribution only" do
-    it "finds the master variant" do
-      d = create(:distributor_enterprise)
-      p = create(:product, distributors: [d])
-      d.product_distribution_variants.should == [p.master]
-    end
-
-    it "finds other variants" do
-      d = create(:distributor_enterprise)
-      p = create(:product, distributors: [d])
-      v = create(:variant, product: p)
-      d.product_distribution_variants.sort.should == [p.master, v].sort
-    end
-
-    it "does not find variants distributed by order cycle" do
-      d = create(:distributor_enterprise)
-      p = create(:product)
-      oc = create(:simple_order_cycle, distributors: [d], variants: [p.master])
-      d.product_distribution_variants.should == []
     end
   end
 
