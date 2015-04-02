@@ -9,7 +9,7 @@ Spree::OrderPopulator.class_eval do
       errors.add(:base, "That distributor or order cycle can't supply all the products in your cart. Please choose another.")
     end
 
-    if valid? 
+    if valid?
       @order.with_lock do
         @order.empty! if overwrite
 
