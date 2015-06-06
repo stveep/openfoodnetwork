@@ -13,7 +13,8 @@ class Enterprise < ActiveRecord::Base
 
   self.inheritance_column = nil
 
-  acts_as_gmappable :process_geocoding => false
+# Not requred in version >2 
+#  acts_as_gmappable :process_geocoding => false
 
   has_and_belongs_to_many :groups, class_name: 'EnterpriseGroup'
   has_many :producer_properties, foreign_key: 'producer_id'
