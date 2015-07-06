@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150527004427) do
+ActiveRecord::Schema.define(:version => 20150612045544) do
 
   create_table "adjustment_metadata", :force => true do |t|
     t.integer "adjustment_id"
@@ -322,7 +322,9 @@ ActiveRecord::Schema.define(:version => 20150527004427) do
   add_index "enterprises", ["address_id"], :name => "index_enterprises_on_address_id"
   add_index "enterprises", ["confirmation_token"], :name => "index_enterprises_on_confirmation_token", :unique => true
   add_index "enterprises", ["is_primary_producer", "sells"], :name => "index_enterprises_on_is_primary_producer_and_sells"
+  add_index "enterprises", ["name"], :name => "index_enterprises_on_name", :unique => true
   add_index "enterprises", ["owner_id"], :name => "index_enterprises_on_owner_id"
+  add_index "enterprises", ["permalink"], :name => "index_enterprises_on_permalink", :unique => true
   add_index "enterprises", ["sells"], :name => "index_enterprises_on_sells"
 
   create_table "exchange_fees", :force => true do |t|
@@ -395,6 +397,16 @@ ActiveRecord::Schema.define(:version => 20150527004427) do
   add_index "product_distributions", ["distributor_id"], :name => "index_product_distributions_on_distributor_id"
   add_index "product_distributions", ["enterprise_fee_id"], :name => "index_product_distributions_on_enterprise_fee_id"
   add_index "product_distributions", ["product_id"], :name => "index_product_distributions_on_product_id"
+
+  create_table "sessions", :force => true do |t|
+    t.string   "session_id", :null => false
+    t.text     "data"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
+
+  add_index "sessions", ["session_id"], :name => "index_sessions_on_session_id"
+  add_index "sessions", ["updated_at"], :name => "index_sessions_on_updated_at"
 
   create_table "spree_activators", :force => true do |t|
     t.string   "description"
@@ -1115,7 +1127,7 @@ ActiveRecord::Schema.define(:version => 20150527004427) do
   add_index "variant_overrides", ["variant_id", "hub_id"], :name => "index_variant_overrides_on_variant_id_and_hub_id"
 
   add_foreign_key "adjustment_metadata", "enterprises", name: "adjustment_metadata_enterprise_id_fk"
-  add_foreign_key "adjustment_metadata", "spree_adjustments", name: "adjustment_metadata_adjustment_id_fk", column: "adjustment_id"
+  add_foreign_key "adjustment_metadata", "spree_adjustments", name: "adjustment_metadata_adjustment_id_fk", column: "adjustment_id", dependent: :delete
 
   add_foreign_key "carts", "spree_users", name: "carts_user_id_fk", column: "user_id"
 

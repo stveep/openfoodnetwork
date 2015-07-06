@@ -88,12 +88,12 @@ class Api::CachedEnterpriseSerializer < ActiveModel::Serializer
 
   def producers
     relatives = options[:data].relatives[object.id]
-    relatives ? ids_to_objs(relatives[:producers]) : []
+    ids_to_objs(relatives.andand[:producers])
   end
 
   def hubs
     relatives = options[:data].relatives[object.id]
-    relatives ? ids_to_objs(relatives[:distributors]) : []
+    ids_to_objs(relatives.andand[:distributors])
   end
 
   # Map svg icons.
@@ -138,6 +138,7 @@ class Api::CachedEnterpriseSerializer < ActiveModel::Serializer
   private
 
   def ids_to_objs(ids)
-    ids.andand.map { |id| {id: id} }
+    return [] if ids.blank?
+    ids.map { |id| {id: id} }
   end
 end
