@@ -67,6 +67,38 @@ Spree::Admin::OrdersController.class_eval do
     end
   end
 
+  # Overriding check for line items - this allows setting distributor/oc before adding items
+  def update
+    return_path = nil
+    if @order.update_attributes(params[:order]) # Original: && @order.line_items.present?
+      @order.update!
+      unless @order.complete?
+        if @order.line_items.present?
+          # Jump to next step
+          return_path = admin_order_customer_path(@order)
+        else
+          # If no line items, redirect to add some:
+          return_path = edit_admin_order_path(@order)
+        end
+      else
+        # Otherwise, go back to first page since all necessary information has been filled out.
+        return_path = admin_order_path(@order)
+      end
+    # else
+      # Original Spree code: @order.errors.add(:line_items, t('errors.messages.blank')) if @order.line_items.empty?
+    end
+
+    respond_with(@order) do |format|
+      format.html do
+        if return_path
+          redirect_to return_path
+        else
+          render :action => :edit
+        end
+      end
+    end
+  end
+
   # Overwrite to use confirm_email_for_customer instead of confirm_email.
   # This uses a new template. See mailers/spree/order_mailer_decorator.rb.
   def resend

@@ -1,2 +1,2 @@
-add_to_attributes "table.index"
+add_to_attributes "#add-line-item"
 attributes "ng-show" => "<%= @order.distribution_set? %>"
