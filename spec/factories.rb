@@ -321,6 +321,7 @@ FactoryGirl.define do
     stripe_user_id "abc123"
     stripe_publishable_key "xyz456"
   end
+
 end
 
 

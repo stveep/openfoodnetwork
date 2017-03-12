@@ -38,6 +38,7 @@ feature "As a consumer I want to check out my cart", js: true, retry: 3 do
         pm.preferred_signature = 'AFcWxV21C7fd0v3bYYYRCpSSRl31AaTntNJ-AjvUJkWf4dgJIvcLsf1V'
       end
     end
+    let!(:stripe_pm) { create(:payment_method, distributors: [distributor], name: "Stripe", type: "Spree::Gateway::StripeConnect") }
 
 
     before do
@@ -63,6 +64,12 @@ feature "As a consumer I want to check out my cart", js: true, retry: 3 do
     end
     context 'login in as user' do
       let(:user) { create(:user) }
+      let!(:saved_card) { create(:credit_card,
+                                user_id: user.id,
+                                month: "01",
+                                year: "2025",
+                                cc_type: "Visa",
+                                number: "1111111111111111" ) }
 
       before do
         quick_login_as(user)
@@ -112,6 +119,19 @@ feature "As a consumer I want to check out my cart", js: true, retry: 3 do
 
         user.reload.bill_address.address1.should eq '123 Your Head'
         user.reload.ship_address.address1.should eq '123 Your Head'
+      end
+      context "with Stripe" do
+        before do
+          toggle_payment
+          choose stripe_pm.name
+        end
+        it "shows the saved credit card dropdown" do
+          page.should have_content "Previously Used Credit Cards"
+        end
+        it "disables the input fields when a saved card is selected" do
+          select "Visa XXXX XXXX XXXX 1111 Exp 01/2025", from: "selected_card"
+          page.should have_css "#secrets\\.card_number[disabled]"
+        end
       end
     end
 
