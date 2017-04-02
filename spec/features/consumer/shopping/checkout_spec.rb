@@ -69,7 +69,8 @@ feature "As a consumer I want to check out my cart", js: true, retry: 3 do
                                 month: "01",
                                 year: "2025",
                                 cc_type: "Visa",
-                                number: "1111111111111111" ) }
+                                number: "1111111111111111",
+                                payment_method_id: stripe_pm.id) }
 
       before do
         quick_login_as(user)
@@ -125,12 +126,20 @@ feature "As a consumer I want to check out my cart", js: true, retry: 3 do
           toggle_payment
           choose stripe_pm.name
         end
+
         it "shows the saved credit card dropdown" do
           page.should have_content "Previously Used Credit Cards"
         end
+
         it "disables the input fields when a saved card is selected" do
           select "Visa XXXX XXXX XXXX 1111 Exp 01/2025", from: "selected_card"
           page.should have_css "#secrets\\.card_number[disabled]"
+        end
+
+        it "allows use of a saved card" do
+          select "Visa XXXX XXXX XXXX 1111 Exp 01/2025", from: "selected_card"
+          place_order
+          page.should have_content "Your order has been processed successfully"
         end
       end
     end
