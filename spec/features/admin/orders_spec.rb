@@ -105,6 +105,13 @@ feature %q{
     page.should have_content "Distributor or order cycle cannot supply the products in your cart"
   end
 
+  scenario "Allows manual addition of payments" do
+    login_to_admin_as @user
+    visit spree.admin_order_path(@order)
+    click_link 'Payments'
+    expect(page).to have_content "NEW PAYMENT"
+  end
+
 
   scenario "can't add products to an order outside the order's hub and order cycle" do
     product = create(:simple_product)
@@ -219,6 +226,7 @@ feature %q{
           expect(page).to have_link "Cancel Order", href: spree.fire_admin_order_path(order, :e => 'cancel')
         end
       end
+
     end
 
     scenario "creating an order with distributor and order cycle" do
