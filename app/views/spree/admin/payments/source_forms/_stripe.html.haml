@@ -1,4 +1,10 @@
 -# = render "spree/admin/payments/source_forms/gateway", payment_method: payment_method
+.stripe
+  %script{:src => "https://js.stripe.com/v3/", :type => "text/javascript"}
+  - if Stripe.publishable_key
+    :javascript
+      angular.module('admin.payments').value("stripeObject", Stripe("#{Stripe.publishable_key}"))
 
-%strong
-  = t('.no_payment_via_admin_backend')
+  = admin_inject_json "admin.payments", "railsFlash", "flash"
+  = admin_inject_json "admin.payments", "currentOrderNumber", @order.number
+  %stripe-elements
