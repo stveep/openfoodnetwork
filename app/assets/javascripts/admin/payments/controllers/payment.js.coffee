@@ -1,14 +1,14 @@
-angular.module("admin.payments").controller "PaymentCtrl", ($scope, $timeout) ->
-  $scope.form_data = {
-    amount: '',
-    payment_method: ''
-  }
-  # Need to get the amount, payment method from the form.
-  # Order number is injected
+angular.module("admin.payments").controller "PaymentCtrl", ($scope, $timeout, Payment, PaymentMethods, Loading) ->
+  $scope.form_data = Payment.form_data
+  $scope.submitted = false
+
   $scope.submitPayment = () ->
+    return false if $scope.submitted == true
+    $scope.submitted = true
+    Loading.message = t("submitting_payment")
+    Payment.purchase()
+
     # If stripe, get token then submitPayment
-    console.log "not submitting"
-    return false
 
 
     # Otherwise just submit
