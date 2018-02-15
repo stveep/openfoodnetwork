@@ -84,8 +84,6 @@ Openfoodnetwork::Application.routes.draw do
   get '/:id/shop', to: 'enterprises#shop', as: 'enterprise_shop'
   get "/enterprises/:permalink", to: redirect("/") # Legacy enterprise URL
 
-  devise_for :enterprise, controllers: { confirmations: 'enterprise_confirmations' }
-
   namespace :admin do
     resources :order_cycles do
       post :bulk_update, on: :collection, as: :bulk_update
@@ -99,7 +97,7 @@ Openfoodnetwork::Application.routes.draw do
     resources :enterprises do
       collection do
         get :for_order_cycle
-        get :for_line_items
+        get :visible
         post :bulk_update, as: :bulk_update
       end
 
@@ -143,7 +141,10 @@ Openfoodnetwork::Application.routes.draw do
 
     resources :inventory_items, only: [:create, :update]
 
-    resources :customers, only: [:index, :create, :update, :destroy]
+    resources :customers, only: [:index, :create, :update, :destroy] do
+      get :addresses, on: :member
+      get :cards, on: :member
+    end
 
     resources :tag_rules, only: [], format: :json do
       get :map_by_tag, on: :collection
@@ -175,6 +176,23 @@ Openfoodnetwork::Application.routes.draw do
     resources :stripe_accounts, only: [:destroy] do
       get :connect, on: :collection
       get :status, on: :collection
+    end
+
+    resources :schedules, only: [:index, :create, :update, :destroy], format: :json
+
+    resources :subscriptions, only: [:index, :new, :create, :edit, :update] do
+      put :cancel, on: :member
+      put :pause, on: :member
+      put :unpause, on: :member
+    end
+
+    resources :subscription_line_items, only: [], format: :json do
+      post :build, on: :collection
+    end
+
+    resources :proxy_orders, only: [:edit] do
+      put :cancel, on: :member, format: :json
+      put :resume, on: :member, format: :json
     end
   end
 
@@ -214,7 +232,8 @@ Spree::Core::Engine.routes.draw do
              :class_name => 'Spree::User',
              :controllers => { :sessions => 'spree/user_sessions',
                                :registrations => 'user_registrations',
-                               :passwords => 'user_passwords' },
+                               :passwords => 'user_passwords',
+                               :confirmations => 'user_confirmations'},
              :skip => [:unlocks, :omniauth_callbacks],
              :path_names => { :sign_out => 'logout' },
              :path_prefix => :user
@@ -272,6 +291,7 @@ Spree::Core::Engine.routes.prepend do
   namespace :admin do
     get '/search/known_users' => "search#known_users", :as => :search_known_users
     get '/search/customers' => 'search#customers', :as => :search_customers
+    get '/search/customer_addresses' => 'search#customer_addresses', :as => :search_customer_addresses
 
     resources :products do
       get :product_distributions, on: :member

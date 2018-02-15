@@ -91,11 +91,14 @@ module Spree
         let(:v_external) { create(:variant, product: p_external) }
 
         let!(:ex_in) { create(:exchange, order_cycle: oc, sender: s, receiver: oc.coordinator,
-                              incoming: true, variants: [v1, v2]) }
+                              incoming: true, variants: [v1, v2]) 
+        }
         let!(:ex_out1) { create(:exchange, order_cycle: oc, sender: oc.coordinator, receiver: d1,
-                                incoming: false, variants: [v1]) }
+                                incoming: false, variants: [v1]) 
+        }
         let!(:ex_out2) { create(:exchange, order_cycle: oc, sender: oc.coordinator, receiver: d2,
-                                incoming: false, variants: [v2]) }
+                                incoming: false, variants: [v2]) 
+        }
 
         it "returns variants in the order cycle and distributor" do
           p1.variants.for_distribution(oc, d1).should == [v1]
@@ -160,6 +163,26 @@ module Spree
             expect(variants).to include visible_variant
             expect(variants).to_not include new_variant, hidden_variant
           end
+        end
+      end
+
+      describe 'stockable_by' do
+        let(:shop) { create(:distributor_enterprise) }
+        let(:add_to_oc_producer) { create(:supplier_enterprise) }
+        let(:other_producer) { create(:supplier_enterprise) }
+        let!(:v1) { create(:variant, product: create(:simple_product, supplier: shop ) ) }
+        let!(:v2) { create(:variant, product: create(:simple_product, supplier: add_to_oc_producer ) ) }
+        let!(:v3) { create(:variant, product: create(:simple_product, supplier: other_producer ) ) }
+
+        before do
+          create(:enterprise_relationship, parent: add_to_oc_producer, child: shop, permissions_list: [:add_to_order_cycle])
+          create(:enterprise_relationship, parent: other_producer, child: shop, permissions_list: [:manage_products])
+        end
+
+        it 'shows variants produced by the enterprise and any producers granting P-OC' do
+          stockable_variants = Spree::Variant.stockable_by(shop)
+          expect(stockable_variants).to include v1, v2
+          expect(stockable_variants).to_not include v3
         end
       end
     end

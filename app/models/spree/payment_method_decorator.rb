@@ -1,8 +1,6 @@
 Spree::PaymentMethod.class_eval do
   include Spree::Core::CalculatedAdjustments
 
-  Spree::PaymentMethod::DISPLAY = [:both, :front_end, :back_end]
-
   acts_as_taggable
 
   has_and_belongs_to_many :distributors, join_table: 'distributors_payment_methods', :class_name => 'Enterprise', association_foreign_key: 'distributor_id'
@@ -29,6 +27,8 @@ Spree::PaymentMethod.class_eval do
     joins(:distributors).
       where('enterprises.id = ?', distributor)
   }
+
+  scope :for_subscriptions, where(type: Subscription::ALLOWED_PAYMENT_METHOD_TYPES)
 
   scope :by_name, order('spree_payment_methods.name ASC')
 

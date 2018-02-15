@@ -20,7 +20,7 @@ module Admin
     describe "creating an enterprise" do
       let(:country) { Spree::Country.find_by_name 'Australia' }
       let(:state) { Spree::State.find_by_name 'Victoria' }
-      let(:enterprise_params) { {enterprise: {name: 'zzz', permalink: 'zzz', is_primary_producer: '0', email: "bob@example.com", address_attributes: {address1: 'a', city: 'a', zipcode: 'a', country_id: country.id, state_id: state.id}}} }
+      let(:enterprise_params) { {enterprise: {name: 'zzz', permalink: 'zzz', is_primary_producer: '0', address_attributes: {address1: 'a', city: 'a', zipcode: 'a', country_id: country.id, state_id: state.id}}} }
 
       it "grants management permission if the current user is an enterprise user" do
         controller.stub spree_current_user: distributor_manager
@@ -30,16 +30,6 @@ module Admin
         enterprise = Enterprise.find_by_name 'zzz'
         response.should redirect_to edit_admin_enterprise_path enterprise
         distributor_manager.enterprise_roles.where(enterprise_id: enterprise).first.should be
-      end
-
-      it "does not grant management permission to admins" do
-        controller.stub spree_current_user: admin_user
-        enterprise_params[:enterprise][:owner_id] = admin_user
-
-        spree_put :create, enterprise_params
-        enterprise = Enterprise.find_by_name 'zzz'
-        response.should redirect_to edit_admin_enterprise_path enterprise
-        admin_user.enterprise_roles.where(enterprise_id: enterprise).should be_empty
       end
 
       it "overrides the owner_id submitted by the user (when not super admin)" do
@@ -572,18 +562,22 @@ module Admin
       end
     end
 
-    describe "for_line_items" do
-      let!(:user) { create(:user) }
-      let!(:enterprise) { create(:enterprise, sells: 'any', owner: user) }
+    describe "visible" do
+      let!(:user) { create(:user, enterprise_limit: 10) }
+      let!(:visible_enterprise) { create(:enterprise, sells: 'any', owner: user) }
+      let!(:not_visible_enterprise) { create(:enterprise, sells: 'any') }
 
       before do
         # As a user with permission
         controller.stub spree_current_user: user
+
+        # :create_variant_overrides does not affect visiblity (at time of writing)
+        create(:enterprise_relationship, parent: not_visible_enterprise, child: visible_enterprise, permissions_list: [:create_variant_overrides])
       end
 
-      it "initializes permissions with the existing OrderCycle" do
-        # expect(controller).to receive(:render_as_json).with([enterprise], {ams_prefix: 'basic', spree_current_user: user})
-        spree_get :for_line_items, format: :json
+      it "uses permissions to determine which enterprises are visible and should be rendered" do
+        expect(controller).to receive(:render_as_json).with([visible_enterprise], {ams_prefix: 'basic', spree_current_user: user}).and_call_original
+        spree_get :visible, format: :json
       end
     end
 

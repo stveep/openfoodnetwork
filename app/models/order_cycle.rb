@@ -6,6 +6,8 @@ class OrderCycle < ActiveRecord::Base
 
   has_many :exchanges, :dependent => :destroy
 
+  has_and_belongs_to_many :schedules, join_table: 'order_cycle_schedules'
+
   # TODO: DRY the incoming/outgoing clause used in several cases below
   # See Spree::Product definition, scopes variants and variants_including_master
   # This will require these accessors to be renamed
@@ -38,7 +40,8 @@ class OrderCycle < ActiveRecord::Base
     joins(:exchanges).
       merge(Exchange.outgoing).
       merge(Exchange.with_product(product)).
-      select('DISTINCT order_cycles.*') }
+      select('DISTINCT order_cycles.*')
+  }
 
   scope :with_distributor, lambda { |distributor|
     joins(:exchanges).merge(Exchange.outgoing).merge(Exchange.to_enterprise(distributor))
@@ -73,7 +76,7 @@ class OrderCycle < ActiveRecord::Base
     enterprises = Enterprise.managed_by(user)
 
     # Order cycles where I managed an enterprise at either end of an outgoing exchange
-    # ie. coordinator or distibutor
+    # ie. coordinator or distributor
     joins(:exchanges).merge(Exchange.outgoing).
       where('exchanges.receiver_id IN (?) OR exchanges.sender_id IN (?)', enterprises, enterprises).
       select('DISTINCT order_cycles.*')

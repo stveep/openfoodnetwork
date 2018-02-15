@@ -68,7 +68,8 @@ feature "Registration", js: true do
       expect(e.address.address1).to eq "123 Abc Street"
       expect(e.sells).to eq "unspecified"
       expect(e.is_primary_producer).to eq true
-      expect(e.contact).to eq "Saskia Munroe"
+      expect(e.contact.id).to eq e.owner_id
+      expect(e.contact_name).to eq "Saskia Munroe"
 
       # Filling in about
       fill_in 'enterprise_description', with: 'Short description'
@@ -102,7 +103,6 @@ feature "Registration", js: true do
       perform_and_ensure(:click_button, "Continue", lambda { page.has_content? 'Finished!' })
 
       # Done
-      expect(page).to have_content "We've sent a confirmation email to #{user.email} if it hasn't been activated before."
       e.reload
       expect(e.website).to eq "www.shop.com"
       expect(e.facebook).to eq "FaCeBoOk"

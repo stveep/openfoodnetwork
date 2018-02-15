@@ -133,6 +133,60 @@ FactoryGirl.define do
     receiver    { incoming ? order_cycle.coordinator : FactoryGirl.create(:enterprise) }
   end
 
+  factory :schedule, class: Schedule do
+    sequence(:name) { |n| "Schedule #{n}" }
+    order_cycles { [OrderCycle.first || FactoryGirl.create(:simple_order_cycle)] }
+  end
+
+  factory :subscription, :class => Subscription do
+    shop { create :enterprise }
+    schedule { create(:schedule, order_cycles: [create(:simple_order_cycle, coordinator: shop)]) }
+    customer { create(:customer, enterprise: shop) }
+    bill_address { create(:address) }
+    ship_address { create(:address) }
+    payment_method { create(:payment_method, distributors: [shop]) }
+    shipping_method { create(:shipping_method, distributors: [shop]) }
+    begins_at { 1.month.ago }
+
+    ignore do
+      with_items false
+      with_proxy_orders false
+    end
+
+    after(:create) do |subscription, proxy|
+      if proxy.with_items
+        subscription.subscription_line_items = build_list(:subscription_line_item, 3, subscription: subscription)
+        subscription.order_cycles.each do |oc|
+          ex = oc.exchanges.outgoing.find_by_sender_id_and_receiver_id(subscription.shop_id, subscription.shop_id) ||
+            create(:exchange, :order_cycle => oc, :sender => subscription.shop, :receiver => subscription.shop, :incoming => false, :pickup_time => 'time', :pickup_instructions => 'instructions')
+          subscription.subscription_line_items.each { |sli| ex.variants << sli.variant }
+        end
+      end
+
+      if proxy.with_proxy_orders
+        subscription.order_cycles.each do |oc|
+          subscription.proxy_orders << create(:proxy_order, subscription: subscription, order_cycle: oc)
+        end
+      end
+    end
+  end
+
+  factory :subscription_line_item, :class => SubscriptionLineItem do
+    subscription
+    variant
+    quantity 1
+  end
+
+  factory :proxy_order, :class => ProxyOrder do
+    subscription
+    order_cycle { subscription.order_cycles.first }
+    before(:create) do |proxy_order, proxy|
+      if proxy_order.order
+        proxy_order.order.update_attribute(:order_cycle_id, proxy_order.order_cycle_id)
+      end
+    end
+  end
+
   factory :variant_override, :class => VariantOverride do
     price         77.77
     count_on_hand 11111
@@ -152,9 +206,7 @@ FactoryGirl.define do
     sells 'any'
     description 'enterprise'
     long_description '<p>Hello, world!</p><p>This is a paragraph.</p>'
-    email 'enterprise@example.com'
     address { FactoryGirl.create(:address) }
-    confirmed_at { Time.zone.now }
   end
 
   factory :supplier_enterprise, :parent => :enterprise do
@@ -430,12 +482,18 @@ FactoryGirl.modify do
   end
 
   factory :user do
+    confirmation_sent_at '1970-01-01 00:00:00'
+    confirmed_at '1970-01-01 00:00:01'
+
     after(:create) do |user|
       user.spree_roles.clear # Remove admin role
     end
   end
 
   factory :admin_user do
+    confirmation_sent_at '1970-01-01 00:00:00'
+    confirmed_at '1970-01-01 00:00:01'
+
     after(:create) do |user|
       user.spree_roles << Spree::Role.find_or_create_by_name!('admin')
     end

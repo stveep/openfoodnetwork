@@ -28,6 +28,8 @@ end
 
 every 5.minutes do
   enqueue_job 'HeartbeatJob', priority: 0
+  enqueue_job 'SubscriptionPlacementJob', priority: 0
+  enqueue_job 'SubscriptionConfirmJob', priority: 0
 end
 
 every 1.day, at: '1:00am' do

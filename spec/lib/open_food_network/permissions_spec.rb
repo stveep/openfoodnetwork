@@ -107,7 +107,8 @@ module OpenFoodNetwork
       let!(:hub) { create(:distributor_enterprise) }
       let!(:producer) { create(:supplier_enterprise) }
       let!(:er) { create(:enterprise_relationship, parent: producer, child: hub,
-                         permissions_list: [:create_variant_overrides]) }
+                         permissions_list: [:create_variant_overrides]) 
+      }
 
       before do
         permissions.stub(:managed_enterprises) { Enterprise.where(id: hub.id) }
@@ -139,7 +140,8 @@ module OpenFoodNetwork
       describe "hubs connected to the user by relationships only" do
         let!(:producer_managed) { create(:supplier_enterprise) }
         let!(:er_oc) { create(:enterprise_relationship, parent: hub, child: producer_managed,
-                              permissions_list: [:add_to_order_cycle, :create_variant_overrides]) }
+                              permissions_list: [:add_to_order_cycle, :create_variant_overrides]) 
+        }
 
         before do
           permissions.stub(:managed_enterprises) { Enterprise.where(id: producer_managed.id) }
@@ -390,6 +392,17 @@ module OpenFoodNetwork
         it "should not let me see the line_items" do
           expect(permissions.visible_line_items).to_not include line_item1, line_item2
         end
+      end
+    end
+
+    describe "finding visible subscriptions" do
+      let!(:so1) { create(:subscription) }
+      let!(:so2) { create(:subscription) }
+
+      it "returns subscriptions placed with managed shops" do
+        expect(permissions).to receive(:managed_enterprises) { [so1.shop] }
+
+        expect(permissions.visible_subscriptions).to eq [so1]
       end
     end
   end

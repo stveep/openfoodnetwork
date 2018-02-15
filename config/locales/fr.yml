@@ -960,6 +960,9 @@ fr:
   email_signup_welcome: "Bienvenue sur %{sitename}!"
   email_signup_login: Vos identifiants de connection
   email_signup_email: Votre email de connexion est
+  email_signup_confirmed_email: "Merci d'avoir confirmé votre adresse email."
+  email_signup_login: Votre login
+  email_signup_email: Votre email de connexion est
   email_signup_shop_html: "Vous pouvez maintenant commencer vos achats sur %{link}."
   email_signup_text: "Merci d'avoir rejoint le réseau. Si vous êtes un client, nous sommes impatients de vous faire découvrir de nombreux agriculteurs fantastiques, de merveilleux hubs de distribution et des plats délicieux! Si vous êtes un producteur ou autre entreprise alimentaire, nous sommes ravis de vous compter parmi les membres du réseau."
   email_signup_help_html: "Vos questions et feedbacks sont les bienvenus! Cliquez sur le bouton <em>Envoyer un commentaire</em> sur le site ou envoyez-nous un email à %{email}"

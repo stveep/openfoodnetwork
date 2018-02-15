@@ -12,7 +12,7 @@ module OrderCyclesHelper
   end
 
   def permitted_producer_enterprise_options_for(order_cycle)
-    validated_enterprise_options permitted_producer_enterprises_for(order_cycle), confirmed: true
+    validated_enterprise_options permitted_producer_enterprises_for(order_cycle)
   end
 
   def permitted_coordinating_enterprises_for(order_cycle)
@@ -20,7 +20,7 @@ module OrderCyclesHelper
   end
 
   def permitted_coordinating_enterprise_options_for(order_cycle)
-    validated_enterprise_options permitted_coordinating_enterprises_for(order_cycle), confirmed: true
+    validated_enterprise_options permitted_coordinating_enterprises_for(order_cycle)
   end
 
   def permitted_hub_enterprises_for(order_cycle)
@@ -28,7 +28,7 @@ module OrderCyclesHelper
   end
 
   def permitted_hub_enterprise_options_for(order_cycle)
-    validated_enterprise_options permitted_hub_enterprises_for(order_cycle), confirmed: true, shipping_and_payment_methods: true
+    validated_enterprise_options permitted_hub_enterprises_for(order_cycle), shipping_and_payment_methods: true
   end
 
   def order_cycle_status_class(order_cycle)
@@ -58,8 +58,8 @@ module OrderCyclesHelper
     OrderCycle.active.with_distributor(@distributor).present?
   end
 
-  def order_cycles_simple_index
-    @order_cycles_simple_index ||= !OpenFoodNetwork::Permissions.new(spree_current_user).can_manage_complex_order_cycles?
+  def simple_index
+    @simple_index ||= !OpenFoodNetwork::Permissions.new(spree_current_user).can_manage_complex_order_cycles?
   end
 
   def order_cycles_simple_form
@@ -91,8 +91,6 @@ module OrderCyclesHelper
         elsif e.payment_methods.available.empty?
           disabled_message = I18n.t(:no_payment)
         end
-      elsif options[:confirmed] && !e.confirmed?
-        disabled_message = I18n.t(:unconfirmed)
       end
 
       if disabled_message

@@ -27,6 +27,10 @@ Style/Documentation:
 Style/StringLiterals:
   Enabled: false
 
+Style/HashSyntax:
+  Enabled: true
+  EnforcedStyle: ruby19_no_mixed_keys
+
 Layout/MultilineMethodCallIndentation:
   Enabled: true
   EnforcedStyle: indented
@@ -51,6 +55,10 @@ Lint/UselessAssignment:
 # AFAIK, there is no good alternative to dynamic matchers until we upgrade
 # to Rails 4 and can use #find_by. If there is a better approach, let's do it.
 Rails/DynamicFindBy:
+  Enabled: false
+
+# Same as above, #find_by is not available until Rails 4
+Rails/FindBy:
   Enabled: false
 
 # This should be the programmer's discretion, perhaps we should review all of

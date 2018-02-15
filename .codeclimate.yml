@@ -1,14 +1,36 @@
-engines:
+version: "2"
+plugins:
   rubocop:
     enabled: true
-    channel: rubocop-0-48
+    channel: "rubocop-0-48"
   scss-lint:
     enabled: false
-ratings:
-  paths:
-  - app/**
-  - lib/**
-  - "**.rb"
-exclude_paths:
-- spec/**/*
-- vendor/**/*
+  duplication:
+    enabled: true
+    exclude_patterns:
+    - "db/**"
+    - "config/initializers/active_record_postgresql_referential_integrity_patch.rb"
+checks:
+  argument-count:
+    enabled: false
+  complex-logic:
+    enabled: true
+  file-lines:
+    enabled: false
+  method-complexity:
+    enabled: false
+  method-count:
+    enabled: false
+  method-lines:
+    enabled: false
+  nested-control-flow:
+    enabled: true
+  return-statements:
+    enabled: true
+  similar-code:
+    enabled: true
+  identical-code:
+    enabled: true
+exclude_patterns:
+- "spec/**/*"
+- "vendor/**/*"

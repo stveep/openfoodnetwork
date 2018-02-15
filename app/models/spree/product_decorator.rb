@@ -97,12 +97,14 @@ Spree::Product.class_eval do
   # Find products that are distributed by the given order cycle
   scope :in_order_cycle, lambda { |order_cycle| with_order_cycles_inner.
     merge(Exchange.outgoing).
-    where('order_cycles.id = ?', order_cycle) }
+    where('order_cycles.id = ?', order_cycle) 
+  }
 
   scope :in_an_active_order_cycle, lambda { with_order_cycles_inner.
     merge(OrderCycle.active).
     merge(Exchange.outgoing).
-    where('order_cycles.id IS NOT NULL') }
+    where('order_cycles.id IS NOT NULL') 
+  }
 
   scope :by_producer, joins(:supplier).order('enterprises.name')
   scope :by_name, order('name')
@@ -113,6 +115,13 @@ Spree::Product.class_eval do
     else
       where('supplier_id IN (?)', user.enterprises)
     end
+  }
+
+  scope :stockable_by, lambda { |enterprise|
+    return where('1=0') if enterprise.blank?
+    permitted_producer_ids = EnterpriseRelationship.joins(:parent).permitting(enterprise)
+      .with_permission(:add_to_order_cycle).where(enterprises: { is_primary_producer: true }).pluck(:parent_id)
+    return where('spree_products.supplier_id IN (?)', [enterprise.id] | permitted_producer_ids)
   }
 
 

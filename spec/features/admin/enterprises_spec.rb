@@ -45,7 +45,7 @@ feature %q{
     select2_search admin.email, from: 'Owner'
     select2_search admin.email, from: 'Owner'
 
-    fill_in 'enterprise_contact', :with => 'Kirsten or Ren'
+    fill_in 'enterprise_contact_name', :with => 'Kirsten or Ren'
     fill_in 'enterprise_phone', :with => '0413 897 321'
     fill_in 'enterprise_email_address', :with => 'info@eaterprises.com.au'
     fill_in 'enterprise_website', :with => 'http://eaterprises.com.au'
@@ -91,6 +91,7 @@ feature %q{
     expect(page).to have_checked_field "enterprise_allow_guest_orders_true"
     choose "Visible to registered customers only"
     expect(page).to have_no_checked_field "enterprise_require_login_false"
+    # expect(page).to have_checked_field "enterprise_enable_subscriptions_false"
 
     within(".side_menu") { click_link "Users" }
     select2_search user.email, from: 'Owner'
@@ -139,7 +140,7 @@ feature %q{
     check "enterprise_shipping_method_ids_#{shipping_method.id}"
 
     click_link "Contact"
-    fill_in 'enterprise_contact', :with => 'Kirsten or Ren'
+    fill_in 'enterprise_contact_name', :with => 'Kirsten or Ren'
     fill_in 'enterprise_phone', :with => '0413 897 321'
     fill_in 'enterprise_email_address', :with => 'info@eaterprises.com.au'
     fill_in 'enterprise_website', :with => 'http://eaterprises.com.au'
@@ -345,6 +346,7 @@ feature %q{
 
         # And I should be managing it
         Enterprise.managed_by(enterprise_user).should include enterprise
+        expect(enterprise.contact).to eq enterprise.owner
       end
 
       context "overstepping my owned enterprises limit" do
